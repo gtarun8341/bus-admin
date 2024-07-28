@@ -1,5 +1,5 @@
 // src/api/apiConfig.js
 
-const apiUrl = 'http://localhost:5000';
+const apiUrl = 'https://bus-backend-eight.vercel.app';
 
 export default apiUrl;
