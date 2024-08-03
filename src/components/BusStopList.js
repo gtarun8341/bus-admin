@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import apiUrl from './apiConfig';
+import { Container, Row, Col, Card, Button, Form } from 'react-bootstrap';
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 const BusStopList = () => {
   const [busStops, setBusStops] = useState([]);
   const [busDetails, setBusDetails] = useState([]);
-  const [selectedBuses, setSelectedBuses] = useState([]); // State to hold selected bus details for each bus stop
-  const [busStopDetails, setBusStopDetails] = useState({}); // State to hold selected bus details for each bus stop
+  const [selectedBuses, setSelectedBuses] = useState([]);
+  const [busStopDetails, setBusStopDetails] = useState({});
 
   useEffect(() => {
     const fetchBusStops = async () => {
@@ -32,7 +34,6 @@ const BusStopList = () => {
   }, []);
 
   useEffect(() => {
-    // Fetch bus details for each bus stop
     const fetchBusStopDetails = async () => {
       const busStopDetailsPromises = busStops.map(async (busStop) => {
         try {
@@ -52,7 +53,7 @@ const BusStopList = () => {
     };
 
     fetchBusStopDetails();
-  }, [busStops]); // Trigger fetch when busStops change
+  }, [busStops]);
 
   const handleBusChange = (e, busStopId) => {
     const selectedBusId = e.target.value;
@@ -66,65 +67,77 @@ const BusStopList = () => {
   const handleAddToBusStop = async (busStopId) => {
     try {
       const selectedBusIds = selectedBuses.filter(bus => bus.busStopId === busStopId).map(bus => bus.busId);
-      const response = await axios.put(`${apiUrl}/api/busStops/${busStopId}`, {
-        buses: selectedBusIds,
-      });
-      console.log('Updated bus stop:', response.data);
-      // Clear selected buses after adding
+      await axios.put(`${apiUrl}/api/busStops/${busStopId}`, { buses: selectedBusIds });
+      
+      // Update busStopDetails with the newly added buses
+      setBusStopDetails(prevDetails => ({
+        ...prevDetails,
+        [busStopId]: busDetails.filter(bus => selectedBusIds.includes(bus._id))
+      }));
+
       setSelectedBuses([]);
-      // Optionally handle success feedback
     } catch (error) {
       console.error('Error updating bus stop:', error);
-      // Optionally handle error feedback
     }
   };
 
   return (
-    <div>
-      <h2>Bus Stops</h2>
-      <ul>
+    <Container>
+      <h2 className="my-4 text-center">Manage Bus Stops</h2>
+      <Row>
         {busStops.map(busStop => (
-          <li key={busStop._id}>
-            <p><strong>Station Name:</strong> {busStop.stationName}</p>
-            <p><strong>Coordinates:</strong> {busStop.coordinate.latitude}, {busStop.coordinate.longitude}</p>
-            <p><strong>Station Image:</strong> <img src={busStop.stationImage} alt={busStop.stationName} /></p>
-            <p><strong>Distance:</strong> {busStop.distance}</p>
-            <p><strong>Time:</strong> {busStop.time}</p>
-            <div>
-              <label><strong>Select Bus:</strong></label>
-              {busDetails.map(bus => (
-                <div key={bus._id}>
-                  <input
-                    type="checkbox"
-                    id={`busCheckbox_${busStop._id}_${bus._id}`}
-                    value={bus._id}
-                    onChange={(e) => handleBusChange(e, busStop._id)}
-                  />
-                  <label htmlFor={`busCheckbox_${busStop._id}_${bus._id}`}>
-                    {bus.busName} - {bus.busNumber}
-                  </label>
+          <Col md={4} key={busStop._id} className="mb-4">
+            <Card>
+              <Card.Img variant="top" src={busStop.stationImage} alt={busStop.stationName} />
+              <Card.Body>
+                <Card.Title>{busStop.stationName}</Card.Title>
+                <Card.Text>
+                  <strong>Coordinates:</strong> {busStop.coordinate.latitude}, {busStop.coordinate.longitude}
+                </Card.Text>
+                <Card.Text>
+                  <strong>Distance:</strong> {busStop.distance} km
+                </Card.Text>
+                <Card.Text>
+                  <strong>Time:</strong> {busStop.time}
+                </Card.Text>
+                <Form>
+                  <Form.Group controlId={`formBusSelection_${busStop._id}`}>
+                    <Form.Label><strong>Select Bus:</strong></Form.Label>
+                    {busDetails.map(bus => (
+                      <Form.Check
+                        type="checkbox"
+                        id={`busCheckbox_${busStop._id}_${bus._id}`}
+                        value={bus._id}
+                        label={`${bus.busName} - ${bus.busNumber}`}
+                        onChange={(e) => handleBusChange(e, busStop._id)}
+                        key={bus._id}
+                      />
+                    ))}
+                  </Form.Group>
+                  <Button
+                    variant="primary"
+                    onClick={() => handleAddToBusStop(busStop._id)}
+                    className="mt-2"
+                  >
+                    Add to Bus Stop
+                  </Button>
+                </Form>
+                <div className="mt-4">
+                  <h5>Selected Buses for {busStop.stationName}</h5>
+                  <ul>
+                    {busStopDetails[busStop._id] && busStopDetails[busStop._id].map(bus => (
+                      <li key={bus._id}>
+                        {bus.busName} - {bus.busNumber}
+                      </li>
+                    ))}
+                  </ul>
                 </div>
-              ))}
-            </div>
-            <button onClick={() => handleAddToBusStop(busStop._id)}>Add to Bus Stop</button>
-            {/* Display selected bus details for the bus stop */}
-            <div>
-              <h3>Selected Buses for {busStop.stationName}</h3>
-              <ul>
-                {busStopDetails[busStop._id] && busStopDetails[busStop._id].map(selectedBusId => {
-                  const bus = busDetails.find(bus => bus._id === selectedBusId);
-                  return (
-                    <li key={selectedBusId}>
-                      {bus && `${bus.busName} - ${bus.busNumber}`}
-                    </li>
-                  );
-                })}
-              </ul>
-            </div>
-          </li>
+              </Card.Body>
+            </Card>
+          </Col>
         ))}
-      </ul>
-    </div>
+      </Row>
+    </Container>
   );
 };
 

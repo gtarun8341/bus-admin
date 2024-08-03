@@ -1,5 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import { Navbar, Nav } from 'react-bootstrap';
 import Buses from './components/Buses';
 import BusRoutes from './components/BusRoutes';
 import AssignBus from './components/AssignBus';
@@ -11,31 +12,19 @@ const App = () => {
   return (
     <Router>
       <div className="container">
-        <nav className="navbar navbar-expand-lg navbar-light bg-light">
-          <Link className="navbar-brand" to="/">Bus Management</Link>
-          <button className="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-            <span className="navbar-toggler-icon"></span>
-          </button>
-          <div className="collapse navbar-collapse" id="navbarNav">
-            <ul className="navbar-nav mr-auto">
-              <li className="nav-item">
-                <Link className="nav-link" to="/buses">Manage Buses</Link>
-              </li>
-              <li className="nav-item">
-                <Link className="nav-link" to="/routes">Manage Routes</Link>
-              </li>
-              <li className="nav-item">
-                <Link className="nav-link" to="/assign-bus">Assign Bus to Driver</Link>
-              </li>
-              <li className="nav-item">
-                <Link className="nav-link" to="/busStops">Manage Bus Stops</Link>
-              </li>
-              <li className="nav-item">
-                <Link className="nav-link" to="/busStopList">Manage Bus Stops List</Link>
-              </li>
-            </ul>
-          </div>
-        </nav>
+        <Navbar bg="light" expand="lg">
+          <Navbar.Brand as={Link} to="/">Bus Management</Navbar.Brand>
+          <Navbar.Toggle aria-controls="basic-navbar-nav" />
+          <Navbar.Collapse id="basic-navbar-nav">
+            <Nav className="mr-auto">
+              <Nav.Link as={Link} to="/buses">Manage Buses</Nav.Link>
+              <Nav.Link as={Link} to="/routes">Manage Routes</Nav.Link>
+              <Nav.Link as={Link} to="/assign-bus">Assign Bus to Driver</Nav.Link>
+              <Nav.Link as={Link} to="/busStops">Manage Bus Stops</Nav.Link>
+              <Nav.Link as={Link} to="/busStopList">Manage Bus Stops List</Nav.Link>
+            </Nav>
+          </Navbar.Collapse>
+        </Navbar>
 
         <div className="mt-4">
           <Routes>
